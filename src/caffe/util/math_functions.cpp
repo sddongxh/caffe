@@ -369,6 +369,12 @@ template <typename Ftype>
 void caffe_rng_uniform(int n, Ftype a, Ftype b, Blob* blob) {
   CHECK_GE(n, 0);
   CHECK_LE(a, b);
+
+  if (Caffe::mode() == Caffe::GPU && n >= 1000000) {
+    caffe_gpu_rng_uniform(n, a, b, blob->mutable_gpu_data_c<Ftype>(false));
+    return;
+  }
+
   boost::uniform_real<Ftype> random_distribution(a, caffe_nextafter<Ftype>(b));
   boost::variate_generator<caffe::rng_t*, boost::uniform_real<Ftype> >
       variate_generator(caffe_rng(), random_distribution);

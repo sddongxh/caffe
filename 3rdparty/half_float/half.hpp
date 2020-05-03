@@ -349,7 +349,7 @@ namespace half_float
 		struct binary_t {};
 
 		/// Tag for binary construction.
-		HALF_CONSTEXPR_CONST binary_t binary = binary_t();
+		static HALF_CONSTEXPR_CONST binary_t binary = binary_t();
 
 		/// Temporary half-precision expression.
 		/// This class represents a half-precision expression which just stores a single-precision value internally.
@@ -1172,7 +1172,8 @@ namespace half_float
 		/// Constructor.
 		/// \param bits binary representation to set half to
 		CAFFE_UTIL_HD
-		HALF_CONSTEXPR half(detail::binary_t, detail::uint16 bits) : data_(bits) {}
+		HALF_CONSTEXPR half(detail::binary_t, unsigned int bits) HALF_NOEXCEPT
+		    : data_(static_cast<detail::uint16>(bits)) {}
 
 		/// Internal binary representation
 		detail::uint16 data_;
@@ -3067,32 +3068,32 @@ namespace std
 		static HALF_CONSTEXPR_CONST int max_exponent10 = 4;
 
 		/// Smallest positive normal value.
-		static HALF_CONSTEXPR half_float::half min() HALF_NOTHROW { return half_float::half(half_float::detail::binary, 0x0400); }
+    static HALF_CONSTEXPR half_float::half min() HALF_NOTHROW { return half_float::half{half_float::detail::binary, 0x0400}; }
 
 		/// Smallest finite value.
-		static HALF_CONSTEXPR half_float::half lowest() HALF_NOTHROW { return half_float::half(half_float::detail::binary, 0xFBFF); }
+		static HALF_CONSTEXPR half_float::half lowest() HALF_NOTHROW { return half_float::half{half_float::detail::binary, 0xFBFF}; }
 
 		/// Largest finite value.
-		static HALF_CONSTEXPR half_float::half max() HALF_NOTHROW { return half_float::half(half_float::detail::binary, 0x7BFF); }
+		static HALF_CONSTEXPR half_float::half max() HALF_NOTHROW { return half_float::half{half_float::detail::binary, 0x7BFF}; }
 
 		/// Difference between one and next representable value.
-		static HALF_CONSTEXPR half_float::half epsilon() HALF_NOTHROW { return half_float::half(half_float::detail::binary, 0x1400); }
+		static HALF_CONSTEXPR half_float::half epsilon() HALF_NOTHROW { return half_float::half{half_float::detail::binary, 0x1400}; }
 
 		/// Maximum rounding error.
 		static HALF_CONSTEXPR half_float::half round_error() HALF_NOTHROW
-			{ return half_float::half(half_float::detail::binary, (round_style==std::round_to_nearest) ? 0x3800 : 0x3C00); }
+			{ return half_float::half{half_float::detail::binary, (round_style==std::round_to_nearest) ? 0x3800 : 0x3C00}; }
 
 		/// Positive infinity.
-		static HALF_CONSTEXPR half_float::half infinity() HALF_NOTHROW { return half_float::half(half_float::detail::binary, 0x7C00); }
+		static HALF_CONSTEXPR half_float::half infinity() HALF_NOTHROW { return half_float::half{half_float::detail::binary, 0x7C00}; }
 
 		/// Quiet NaN.
-		static HALF_CONSTEXPR half_float::half quiet_NaN() HALF_NOTHROW { return half_float::half(half_float::detail::binary, 0x7FFF); }
+		static HALF_CONSTEXPR half_float::half quiet_NaN() HALF_NOTHROW { return half_float::half{half_float::detail::binary, 0x7FFF}; }
 
 		/// Signalling NaN.
-		static HALF_CONSTEXPR half_float::half signaling_NaN() HALF_NOTHROW { return half_float::half(half_float::detail::binary, 0x7DFF); }
+		static HALF_CONSTEXPR half_float::half signaling_NaN() HALF_NOTHROW { return half_float::half{half_float::detail::binary, 0x7DFF}; }
 
 		/// Smallest positive subnormal value.
-		static HALF_CONSTEXPR half_float::half denorm_min() HALF_NOTHROW { return half_float::half(half_float::detail::binary, 0x0001); }
+		static HALF_CONSTEXPR half_float::half denorm_min() HALF_NOTHROW { return half_float::half{half_float::detail::binary, 0x0001}; }
 	};
 
 

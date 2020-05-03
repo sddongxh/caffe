@@ -18,8 +18,8 @@ namespace caffe {
  */
 class InternalThread {
  public:
-  InternalThread(int target_device, size_t rank_, size_t threads, bool delayed);
-  virtual ~InternalThread() {}
+  InternalThread(int target_device, size_t rank_, size_t threads, bool delayed, const std::string& name);
+  virtual ~InternalThread() = default;
 
   /**
    * Caffe's thread local state will be initialized using the current
@@ -40,12 +40,16 @@ class InternalThread {
   void StopInternalThread(bool wait_all = true);
   void WaitAll();
 
-  bool is_started(int id = 0) const {
-    return threads_[id].joinable();
+  const string& get_name() const {
+    return name_;
+  }
+
+  bool is_started(int child_id = 0) const {
+    return children_[child_id].joinable();
   }
 
   size_t threads_num() const {
-    return threads_.size();
+    return children_.size();
   }
 
   void go() {
@@ -62,19 +66,20 @@ class InternalThread {
       with the code you want your thread to run. */
   virtual void InternalThreadEntry() {}
 
-  virtual void InternalThreadEntryN(size_t id) {}
+  virtual void InternalThreadEntryN(size_t child_id) {}
 
   /* Should be tested when running loops to exit when requested. */
-  bool must_stop(int id) {
-    return threads_[id].interruption_requested();
+  bool must_stop(size_t child_id) {
+    return children_[child_id].interruption_requested();
   }
 
  private:
-  void entry(int thread_id, int device, Caffe::Brew mode, uint64_t rand_seed,
+  void entry(size_t thread_id, int device, Caffe::Brew mode, uint64_t rand_seed,
       size_t rank, bool set_cpu_affinity);
-
-  vector<boost::thread> threads_;
+  std::uint32_t lwp_id_, lwp_id_parent_;
+  vector<boost::thread> children_;
   vector<shared_ptr<Flag>> delay_flags_;
+  const std::string name_;
 };
 
 }  // namespace caffe

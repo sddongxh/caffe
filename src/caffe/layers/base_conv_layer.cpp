@@ -150,7 +150,7 @@ void BaseConvolutionLayer<Ftype, Btype>::LayerSetUp(const vector<Blob*>& bottom,
     }
     // Initialize and fill the weights:
     // output channels x input channels per-group x kernel height x kernel width
-    this->blobs_[0] = Blob::create<Ftype, Btype>(weight_shape);
+    this->blobs_[0] = Blob::create<Ftype, Btype>(weight_shape, Blob::RESHAPE_MODE::RESHAPE_DATA);
     shared_ptr<Filler<Ftype>> weight_filler(
         GetFiller<Ftype>(this->layer_param_.convolution_param().weight_filler()));
     weight_filler->Fill(this->blobs_[0].get());

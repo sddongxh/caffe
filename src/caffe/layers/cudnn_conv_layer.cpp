@@ -308,6 +308,7 @@ template <typename Ftype, typename Btype>
 void CuDNNConvolutionLayer<Ftype, Btype>::Reshape(
     const vector<Blob*>& bottom, const vector<Blob*>& top) {
   // Check whether cached descriptors have been initialized.
+  bool sizes_changed = false;
   if (initialized_cached_descs_) {
     // Check whether bottom and conv descriptors have changed,
     // which then requires a new reshape and set algo.
@@ -316,6 +317,7 @@ void CuDNNConvolutionLayer<Ftype, Btype>::Reshape(
         IsConvDescChanged(bottom, true) ||
         (this->phase_ == TRAIN && IsConvDescChanged(bottom, false))) {
       use_reshape_ = true;
+      sizes_changed = true;
     } else {
       // When no reshape is needed, setting algo may be still needed
       // (for example, if we are at iteration 1).
@@ -427,7 +429,7 @@ void CuDNNConvolutionLayer<Ftype, Btype>::Reshape(
         align_up<8>(this->weight_offset_ * tsize(tpmax<Btype, float>())));
   }
 
-  if (fwd_count_ == 0UL) {
+  if (sizes_changed || fwd_count_ == 0UL) {
     AllocateWorkspace(bottom.size());
   }
   // Ask cuDNN to find the best algorithm

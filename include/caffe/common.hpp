@@ -159,9 +159,6 @@ class Caffe {
   static shared_ptr<CudaStream> thread_pstream(int group = 0) {
     return Get().pstream(group);
   }
-  static shared_ptr<CuBLASHandle> short_term_cublas_phandle() {
-    return make_shared<CuBLASHandle>();
-  }
 #ifdef USE_CUDNN
   static cudnnHandle_t cudnn_handle(int group) {
     return Get().th_cudnn_handle(group);
@@ -232,14 +229,14 @@ class Caffe {
   /// All physical devices regardless of usage
   static int device_count();
   // Parallel training info
-  static int solver_count() {
+  static size_t solver_count() {
     return solver_count_;
   }
-  /// NUmber of physical devices being used
+  // Number of physical devices being used
   static int device_in_use_per_host_count() {
     return (int)gpus_.size();
   }
-  static void set_solver_count(int val) {
+  static void set_solver_count(size_t val) {
     if (solver_count_ != val) {
       std::lock_guard<std::mutex> lock(caffe_mutex_);
       solver_count_ = val;
@@ -259,27 +256,6 @@ class Caffe {
   }
   static const std::vector<int>& gpus() {
     return gpus_;
-  }
-  static const std::string& caffe_version() {
-    return props().caffe_version();
-  }
-  static const std::string& cudnn_version() {
-    return props().cudnn_version();
-  }
-  static const std::string& cublas_version() {
-    return props().cublas_version();
-  }
-  static const std::string& cuda_version() {
-    return props().cuda_version();
-  }
-  static const std::string& cuda_driver_version() {
-    return props().cuda_driver_version();
-  }
-  static std::string start_time() {
-    return props().start_time();
-  }
-  static std::time_t init_time() {
-    return props().init_time();
   }
   static std::string time_from_init();
   static int device_capability(int device) {
@@ -325,7 +301,7 @@ class Caffe {
   // For example, if user runs `caffe train -gpu=1,0,3` then it has to be set to 1.
   static int root_device_;
   static Brew mode_;
-  static int solver_count_;
+  static size_t solver_count_;
   static std::vector<int> gpus_;
   static int thread_count_;
   static int restored_iter_;
@@ -362,9 +338,9 @@ class Caffe {
   class Properties {
     friend class Caffe;
 
-   public:
     Properties();
 
+   public:
     const std::string& caffe_version() const {
       return caffe_version_;
     }

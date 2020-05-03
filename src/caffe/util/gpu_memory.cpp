@@ -55,16 +55,16 @@ bool GPUMemory::Workspace::try_reserve(size_t size, int device) {
 }
 
 GPUMemory::Manager::Manager() : debug_(false), initialized_(false) {
-  const int count = Caffe::device_count();
-  dev_info_.resize(count);
-  update_thresholds_.resize(count);
 }
-
 
 void GPUMemory::Manager::init(const vector<int>& gpus, bool debug) {
   if (initialized_) {
     return;
   }
+  const int count = Caffe::device_count();
+  dev_info_.resize(count);
+  update_thresholds_.resize(count);
+
   bool debug_env = getenv("DEBUG_GPU_MEM") != 0;
   debug_ = debug || debug_env;
   try {
