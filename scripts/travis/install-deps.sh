@@ -24,7 +24,7 @@ apt-get install -y --no-install-recommends \
   wget
 
 # package bug WAR:
-ln -s /usr/lib/x86_64-linux-gnu/libturbojpeg.so.0 /usr/lib/x86_64-linux-gnu/libturbojpeg.so
+#ln -s /usr/lib/x86_64-linux-gnu/libturbojpeg.so.0 /usr/lib/x86_64-linux-gnu/libturbojpeg.so
 
 if $WITH_CMAKE ; then
   apt-get install -y --no-install-recommends cmake
