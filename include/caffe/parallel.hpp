@@ -79,7 +79,7 @@ class P2PManager {
   static unique_ptr<boost::barrier> solve_bar_;
   static unique_ptr<boost::barrier> solved_bar_;
 
-protected:
+ protected:
   const size_t nranks_;
   vector<unique_ptr<P2PSync>> syncs_;
   shared_ptr<SharedScores<float>> shared_;

@@ -18,7 +18,8 @@ namespace caffe {
  */
 class InternalThread {
  public:
-  InternalThread(int target_device, size_t rank_, size_t threads, bool delayed, const std::string& name);
+  InternalThread(int target_device, size_t rank_, size_t threads, bool delayed,
+      const std::string& name);
   virtual ~InternalThread() = default;
 
   /**

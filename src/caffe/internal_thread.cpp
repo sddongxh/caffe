@@ -7,7 +7,8 @@
 
 namespace caffe {
 
-InternalThread::InternalThread(int target_device, size_t rank, size_t threads, bool delayed, const std::string& name)
+InternalThread::InternalThread(int target_device, size_t rank, size_t threads, bool delayed,
+    const std::string& name)
     : target_device_(target_device),
       rank_(rank),
       lwp_id_(0),

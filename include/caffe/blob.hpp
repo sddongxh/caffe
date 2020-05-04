@@ -54,7 +54,7 @@ class Blob {
   explicit Blob(Type dtype)
       : Blob(dtype, dtype) {}
 
-public:
+ public:
   virtual ~Blob() = default;
 
   enum class RESHAPE_MODE: int {
@@ -117,7 +117,8 @@ public:
 
   /// @brief Creates an instance of a Blob with given type Dtype and given shape.
   template<typename D, typename DI = D>
-  static shared_ptr<Blob> create(const vector<int>& shape, RESHAPE_MODE mode = RESHAPE_MODE::RESHAPE_BOTH) {
+  static shared_ptr<Blob> create(const vector<int>& shape,
+      RESHAPE_MODE mode = RESHAPE_MODE::RESHAPE_BOTH) {
     shared_ptr<Blob> ptr = create<D, DI>();
     ptr->Reshape(shape, mode);
     return ptr;
