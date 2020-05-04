@@ -19,6 +19,7 @@ apt-get install -y --no-install-recommends \
   libhdf5-serial-dev \
   libopenblas-dev \
   libturbojpeg \
+  libturbojpeg0-dev \
   python-virtualenv \
   wget
 
@@ -82,16 +83,16 @@ fi
 
 if $WITH_CUDA ; then
   # install repo packages
-  CUDA_REPO_PKG=cuda-repo-ubuntu1404_8.0.61-1_amd64.deb
-  wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1404/x86_64/$CUDA_REPO_PKG
+  CUDA_REPO_PKG=cuda-10-2_10.2.89-1_amd64.deb
+  wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/$CUDA_REPO_PKG
   dpkg -i $CUDA_REPO_PKG
   rm $CUDA_REPO_PKG
 
   if $WITH_CUDNN ; then
-    ML_REPO_PKG=libcudnn7_7.0.5.15-1+cuda8.0_amd64.deb
-    ML_REPO_PKGD=libcudnn7-dev_7.0.5.15-1+cuda8.0_amd64.deb
-    wget http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1404/x86_64/$ML_REPO_PKG
-    wget http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1404/x86_64/$ML_REPO_PKGD
+    ML_REPO_PKG=libcudnn7_7.6.5.32-1+cuda10.2_amd64.deb
+    ML_REPO_PKGD=libcudnn7-dev_7.6.5.32-1+cuda10.2_amd64.deb
+    wget http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/$ML_REPO_PKG
+    wget http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/$ML_REPO_PKGD
     dpkg -i $ML_REPO_PKG $ML_REPO_PKGD
   fi
 
@@ -99,8 +100,8 @@ if $WITH_CUDA ; then
   apt-get -y update
 
   # install packages
-  CUDA_PKG_VERSION="8-0"
-  CUDA_VERSION="8.0"
+  CUDA_PKG_VERSION="10-2"
+  CUDA_VERSION="10.2"
   apt-get install -y --no-install-recommends \
     cuda-core-$CUDA_PKG_VERSION \
     cuda-cudart-dev-$CUDA_PKG_VERSION \
@@ -110,8 +111,8 @@ if $WITH_CUDA ; then
   # manually create CUDA symlink
   ln -s /usr/local/cuda-$CUDA_VERSION /usr/local/cuda
 
-  if $WITH_CUDNN ; then
-    apt-get install -y --no-install-recommends libcudnn7 libcudnn7-dev
-  fi
+#  if $WITH_CUDNN ; then
+#    apt-get install -y --no-install-recommends libcudnn7 libcudnn7-dev
+#  fi
 fi
 
