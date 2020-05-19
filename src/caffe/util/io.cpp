@@ -196,7 +196,7 @@ cv::Mat ReadImageToCVMat(const string& filename,
   }
   if (cv_img_origin.data) {
     if (is_color && cv_img_origin.channels() < 3) {
-      cv::cvtColor(cv_img_origin, cv_img, CV_GRAY2RGB);
+      cv::cvtColor(cv_img_origin, cv_img, cv::COLOR_GRAY2RGB);
     }
     if (short_side > 0) {
       if (cv_img_origin.rows > cv_img_origin.cols) {
@@ -212,10 +212,10 @@ cv::Mat ReadImageToCVMat(const string& filename,
     }
     cv::Size sz(width, height);
     if (cv_img.data) {
-      cv::resize(cv_img, cv_img_origin, sz, 0., 0., CV_INTER_LINEAR);
+      cv::resize(cv_img, cv_img_origin, sz, 0., 0., cv::INTER_LINEAR);
       return cv_img_origin;
     }
-    cv::resize(cv_img_origin, cv_img, sz, 0., 0., CV_INTER_LINEAR);
+    cv::resize(cv_img_origin, cv_img, sz, 0., 0., cv::INTER_LINEAR);
   } else {
     LOG(ERROR) << "Could not decode file " << filename;
   }
