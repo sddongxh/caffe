@@ -275,7 +275,7 @@ bool WindowDataLayer<Ftype, Btype>::load_batch(Batch* batch,
           image_database_cache_[window[WindowDataLayer<Ftype, Btype>::IMAGE_INDEX]];
         DecodeDatumToCVMat(image_cached.second, true, cv_img, false);
       } else {
-        cv_img = cv::imread(image.first, CV_LOAD_IMAGE_COLOR);
+        cv_img = cv::imread(image.first, cv::IMREAD_COLOR);
         if (!cv_img.data) {
           LOG(ERROR) << "Could not open or find file " << image.first;
           return true;
