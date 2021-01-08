@@ -17,7 +17,7 @@
 # USE_LEVELDB := 0
 # USE_LMDB := 0
 
-# Uncomment if you're using OpenCV 3
+# Uncomment and set accordingly if you're using OpenCV 3/4
 # OPENCV_VERSION := 3
 
 # To customize your choice of compiler, uncomment and set the following.

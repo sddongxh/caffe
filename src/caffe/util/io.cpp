@@ -196,7 +196,7 @@ cv::Mat ReadImageToCVMat(const string& filename,
   }
   if (cv_img_origin.data) {
     if (is_color && cv_img_origin.channels() < 3) {
-      cv::cvtColor(cv_img_origin, cv_img, CV_GRAY2RGB);
+      cv::cvtColor(cv_img_origin, cv_img, cv::COLOR_GRAY2RGB);
     }
     if (short_side > 0) {
       if (cv_img_origin.rows > cv_img_origin.cols) {
@@ -212,10 +212,10 @@ cv::Mat ReadImageToCVMat(const string& filename,
     }
     cv::Size sz(width, height);
     if (cv_img.data) {
-      cv::resize(cv_img, cv_img_origin, sz, 0., 0., CV_INTER_LINEAR);
+      cv::resize(cv_img, cv_img_origin, sz, 0., 0., cv::INTER_LINEAR);
       return cv_img_origin;
     }
-    cv::resize(cv_img_origin, cv_img, sz, 0., 0., CV_INTER_LINEAR);
+    cv::resize(cv_img_origin, cv_img, sz, 0., 0., cv::INTER_LINEAR);
   } else {
     LOG(ERROR) << "Could not decode file " << filename;
   }
@@ -226,8 +226,8 @@ cv::Mat ReadImageToCVMat(const string& filename, const int height,
     const int width, const int min_dim, const int max_dim,
     const bool is_color) {
   cv::Mat cv_img;
-  int cv_read_flag = (is_color ? CV_LOAD_IMAGE_COLOR :
-    CV_LOAD_IMAGE_GRAYSCALE);
+  int cv_read_flag = (is_color ? cv::IMREAD_COLOR :
+    cv::IMREAD_GRAYSCALE);
   cv::Mat cv_img_origin = cv::imread(filename, cv_read_flag);
   if (!cv_img_origin.data) {
     LOG(ERROR) << "Could not open or find file " << filename;
