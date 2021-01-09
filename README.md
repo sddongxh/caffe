@@ -15,7 +15,7 @@ Here are the major features:
 backward passes might be different too), or it can be set for the whole Net.
 * **Layer-wise Adaptive Rate Control (LARC) and adaptive global gradient scaler** for better
  accuracy, especially in 16-bit training.
-* **Integration with  [cuDNN](https://developer.nvidia.com/cudnn) v7**.
+* **Integration with  [cuDNN](https://developer.nvidia.com/cudnn) v8**.
 * **Automatic selection of the best cuDNN convolution algorithm**.
 * **Integration with v2.2 (or higher) of [NCCL library](https://github.com/NVIDIA/nccl)**
  for improved multi-GPU scaling.
@@ -49,10 +49,3 @@ Please cite Caffe in your publications if it helps your research:
 Please read, sign and attach enclosed agreement **NVIDIA_CLA_v1.0.1.docx**
 to your PR.
 
-## Useful notes
-
-Libturbojpeg library is used since 0.16.5. It has a packaging bug. Please execute the following (required for Makefile, optional for CMake):
-```
-sudo apt-get install libturbojpeg libturbojpeg0-dev
-sudo ln -s /usr/lib/x86_64-linux-gnu/libturbojpeg.so.0.1.0 /usr/lib/x86_64-linux-gnu/libturbojpeg.so
-```

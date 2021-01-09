@@ -15,7 +15,7 @@ endif()
 project(Caffe C CXX)
 
 # ---[ Caffe version
-set(CAFFE_TARGET_VERSION "0.17.3")
+set(CAFFE_TARGET_VERSION "0.17.4")
 set(CAFFE_TARGET_SOVERSION "0.17")
 add_definitions(-DCAFFE_VERSION=${CAFFE_TARGET_VERSION})
 
