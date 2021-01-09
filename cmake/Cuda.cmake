@@ -254,7 +254,7 @@ if(USE_CUDNN)
 endif()
 
 if(UNIX OR APPLE)
-  list(APPEND CUDA_NVCC_FLAGS -std=c++11;-Xcompiler;-fPIC)
+  list(APPEND CUDA_NVCC_FLAGS -std=c++14;-Xcompiler;-fPIC)
 endif()
 
 if(APPLE)

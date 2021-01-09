@@ -69,9 +69,9 @@ BLAS_LIB := /opt/OpenBLAS/lib/
 		# $(ANACONDA_HOME)/lib/python2.7/site-packages/numpy/core/include \
 
 # Uncomment to use Python 3 (default is Python 2)
-PYTHON_LIBRARIES := boost_python3 python3.6m
-PYTHON_INCLUDE := /usr/include/python3.6m \
-                 /usr/lib/python3.6/dist-packages/numpy/core/include
+PYTHON_LIBRARIES := boost_python38 python3.8
+PYTHON_INCLUDE := /usr/include/python3.8 \
+                 /usr/lib/python3.8/dist-packages/numpy/core/include
 
 # We need to be able to find libpythonX.X.so or .dylib.
 PYTHON_LIB := /usr/lib

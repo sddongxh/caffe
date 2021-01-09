@@ -27,8 +27,9 @@ endif
 THIRDPARTY_DIR := ./3rdparty
 
 # All of the directories containing code.
-SRC_DIRS := $(shell find * -type d -exec bash -c "find {} -maxdepth 1 \
+SRC_DIRS := $(shell find src python tools examples -type d -exec bash -c "find {} -maxdepth 1 \
 	\( -name '*.cpp' -o -name '*.proto' \) | grep -q ." \; -print 2>/dev/null)
+
 
 # The target shared library name
 LIBRARY_NAME := $(PROJECT)$(LIBRARY_NAME_SUFFIX)
@@ -36,15 +37,16 @@ LIB_BUILD_DIR := $(BUILD_DIR)/lib
 STATIC_NAME := $(LIB_BUILD_DIR)/lib$(LIBRARY_NAME).a
 DYNAMIC_VERSION_MAJOR 		:= 0
 DYNAMIC_VERSION_MINOR 		:= 17
-DYNAMIC_VERSION_REVISION 	:= 3
+DYNAMIC_VERSION_REVISION 	:= 4
 DYNAMIC_NAME_SHORT := lib$(LIBRARY_NAME).so
 DYNAMIC_SONAME_SHORT := $(DYNAMIC_NAME_SHORT).$(DYNAMIC_VERSION_MAJOR).$(DYNAMIC_VERSION_MINOR)
 DYNAMIC_VERSIONED_NAME_SHORT := $(DYNAMIC_SONAME_SHORT).$(DYNAMIC_VERSION_REVISION)
 DYNAMIC_NAME := $(LIB_BUILD_DIR)/$(DYNAMIC_VERSIONED_NAME_SHORT)
 COMMON_FLAGS += -DCAFFE_VERSION=$(DYNAMIC_VERSION_MAJOR).$(DYNAMIC_VERSION_MINOR).$(DYNAMIC_VERSION_REVISION)
-# NVCaffe requires C++ 11
-COMMON_FLAGS += -std=c++11
+# NVCaffe requires C++ 14
+COMMON_FLAGS += -std=c++14
 COMMON_FLAGS += -DCUDA_NO_HALF
+
 
 ##############################
 # Get all source files
