@@ -2,10 +2,16 @@
 
 namespace caffe {
 
+std::string bt_name(size_t rank, size_t queues_num) {
+  std::ostringstream os;
+  os << "BatchTransformer of rank " << rank << ", queues " << queues_num;
+  return os.str();
+}
+
 template<typename Ftype, typename Btype>
-BatchTransformer<Ftype, Btype>::BatchTransformer(int target_device, size_t rank_,
+BatchTransformer<Ftype, Btype>::BatchTransformer(int target_device, size_t rank,
     size_t queues_num, const TransformationParameter& transform_param, bool gpu_transform) :
-    InternalThread(target_device, rank_, 1, false),
+    InternalThread(target_device, rank, 1, false, bt_name(rank, queues_num)),
     queues_num_(queues_num),
     next_batch_queue_(0UL),
     transform_param_(transform_param),

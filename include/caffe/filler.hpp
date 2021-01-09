@@ -282,10 +282,10 @@ class XavierFiller : public Filler<Dtype> {
     CHECK(blob->count());
     int fan_in = blob->count() / blob->num();
     int fan_out = blob->count() / blob->channels();
-    Dtype n = fan_in;  // default to fan_in
+    float n = fan_in;  // default to fan_in
     if (this->filler_param_.variance_norm() ==
         FillerParameter_VarianceNorm_AVERAGE) {
-      n = (fan_in + fan_out) / Dtype(2);
+      n = (fan_in + fan_out) / 2.F;
     } else if (this->filler_param_.variance_norm() ==
         FillerParameter_VarianceNorm_FAN_OUT) {
       n = fan_out;
@@ -334,10 +334,10 @@ class XavierStaticFiller : public Filler<Dtype> {
       xavier_static_filler_data_.resize(blob_count);
       int fan_in = blob_count / blob->num();
       int fan_out = blob_count / blob->channels();
-      Dtype n = fan_in;  // default to fan_in
+      float n = fan_in;  // default to fan_in
       if (this->filler_param_.variance_norm() ==
          FillerParameter_VarianceNorm_AVERAGE) {
-        n = (fan_in + fan_out) / Dtype(2);
+        n = (fan_in + fan_out) / 2.F;
       } else if (this->filler_param_.variance_norm() ==
           FillerParameter_VarianceNorm_FAN_OUT) {
         n = fan_out;

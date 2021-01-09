@@ -32,7 +32,7 @@ void Blob::Reshape(const int n) {
   Reshape(shape);
 }
 
-void Blob::Reshape(const vector<int>& shape) {
+void Blob::Reshape(const vector<int>& shape, RESHAPE_MODE mode) {
   CHECK_LE(shape.size(), kMaxBlobAxes);
   CHECK(data_tensor_);
   CHECK(diff_tensor_);
@@ -51,19 +51,23 @@ void Blob::Reshape(const vector<int>& shape) {
     shape_[i] = shape[i];
     shape_data[i] = shape[i];
   }
-  data_tensor_->Reshape(count_);
-  diff_tensor_->Reshape(count_);
-  CHECK(is_current_data_valid());
-  CHECK(is_current_diff_valid());
+  if (mode == RESHAPE_MODE::RESHAPE_DATA || mode == RESHAPE_MODE::RESHAPE_BOTH) {
+    data_tensor_->Reshape(count_);
+    CHECK(is_current_data_valid());
+  }
+  if (mode == RESHAPE_MODE::RESHAPE_DIFF || mode == RESHAPE_MODE::RESHAPE_BOTH) {
+    diff_tensor_->Reshape(count_);
+    CHECK(is_current_diff_valid());
+  }
 }
 
-void Blob::Reshape(const BlobShape& shape) {
+void Blob::Reshape(const BlobShape& shape, RESHAPE_MODE mode) {
   CHECK_LE(shape.dim_size(), kMaxBlobAxes);
   vector<int> shape_vec(shape.dim_size());
   for (int i = 0; i < shape.dim_size(); ++i) {
     shape_vec[i] = shape.dim(i);
   }
-  Reshape(shape_vec);
+  Reshape(shape_vec, mode);
 }
 
 const int* Blob::gpu_shape() const {
@@ -73,6 +77,7 @@ const int* Blob::gpu_shape() const {
 
 void Blob::ShareData(const Blob& other) {
   CHECK_NE(this, &other);
+  other.ensure_data_count();
 //  CHECK(!other.IsSharedDataCycled());
   if (data_tensor_.get() == other.data_tensor_.get()) {
     CHECK_EQ(data_shared_with_, &other);
@@ -87,6 +92,7 @@ void Blob::ShareData(const Blob& other) {
 
 void Blob::ShareDiff(const Blob& other) {
   CHECK_NE(this, &other);
+  other.ensure_diff_count();
 ///  CHECK(!other.IsSharedDiffCycled());
   if (diff_tensor_.get() == other.diff_tensor_.get()) {
     CHECK_EQ(diff_shared_with_, &other);
@@ -409,6 +415,7 @@ void Blob::ToProto(BlobProto* proto, bool store_in_old_format, bool write_diff) 
     return;
   }
   CHECK(is_current_data_valid());
+  ensure_diff_count();
   CHECK(is_current_diff_valid());
   Type dt = data_type();
   proto->clear_shape();

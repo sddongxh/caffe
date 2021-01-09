@@ -308,6 +308,7 @@ template <typename Ftype, typename Btype>
 void CuDNNConvolutionLayer<Ftype, Btype>::Reshape(
     const vector<Blob*>& bottom, const vector<Blob*>& top) {
   // Check whether cached descriptors have been initialized.
+  bool sizes_changed = false;
   if (initialized_cached_descs_) {
     // Check whether bottom and conv descriptors have changed,
     // which then requires a new reshape and set algo.
@@ -316,6 +317,7 @@ void CuDNNConvolutionLayer<Ftype, Btype>::Reshape(
         IsConvDescChanged(bottom, true) ||
         (this->phase_ == TRAIN && IsConvDescChanged(bottom, false))) {
       use_reshape_ = true;
+      sizes_changed = true;
     } else {
       // When no reshape is needed, setting algo may be still needed
       // (for example, if we are at iteration 1).
@@ -427,7 +429,7 @@ void CuDNNConvolutionLayer<Ftype, Btype>::Reshape(
         align_up<8>(this->weight_offset_ * tsize(tpmax<Btype, float>())));
   }
 
-  if (fwd_count_ == 0UL) {
+  if (sizes_changed || fwd_count_ == 0UL) {
     AllocateWorkspace(bottom.size());
   }
   // Ask cuDNN to find the best algorithm
@@ -467,29 +469,80 @@ template <typename Ftype, typename Btype>
 void CuDNNConvolutionLayer<Ftype, Btype>::GetConvAlgo(const vector<Blob*>& bottom,
     const vector<Blob*>& top, const size_t workspace_bytes, int pad_h, int pad_w,
     int stride_h, int stride_w) {
+  const size_t limit_per_group = align_down<8>(workspace_bytes / ws_groups());
+  int returnedAlgoCount = 0;
   for (int i = 0; i < bottom.size(); ++i) {
-    // Get backward data algorithm (if not set by user)
-    if (user_algos_override_[1] < 0) {
-      CUDNN_CHECK(cudnnGetConvolutionBackwardDataAlgorithm(Caffe::cudnn_handle(0),
-          bwd_filter_desc_, bwd_top_descs_[i], bwd_conv_data_descs_[i], bwd_bottom_descs_[i],
-          CUDNN_CONVOLUTION_BWD_DATA_SPECIFY_WORKSPACE_LIMIT,
-          align_down<8>(workspace_bytes / ws_groups()), &bwd_data_algo_[i]));
-    }
     // Get forward algorithm (if not set by user)
     if (user_algos_override_[0] < 0) {
-      CUDNN_CHECK(cudnnGetConvolutionForwardAlgorithm(Caffe::cudnn_handle(0),
+      int count = 0;
+      CUDNN_CHECK(cudnnGetConvolutionForwardAlgorithmMaxCount(Caffe::cudnn_handle(0), &count));
+      std::vector<cudnnConvolutionFwdAlgoPerf_t> perfResults;
+      CUDNN_CHECK(cudnnFindConvolutionForwardAlgorithm(Caffe::cudnn_handle(0),
           fwd_bottom_descs_[i], fwd_filter_desc_, fwd_conv_descs_[i], fwd_top_descs_[i],
-          CUDNN_CONVOLUTION_FWD_SPECIFY_WORKSPACE_LIMIT,
-          align_down<8>(workspace_bytes / ws_groups()), &fwd_algo_[i]));
-      CUDA_CHECK(cudaStreamSynchronize(Caffe::thread_stream(0)));
+          count, &returnedAlgoCount, &perfResults.front()));
+      if (returnedAlgoCount < 1) {
+        LOG(FATAL) << returnedAlgoCount << " algorithms returned";
+      }
+      bool found = false;
+      for (int a = 0; a < returnedAlgoCount; ++a) {
+        if (perfResults[a].memory <= limit_per_group) {
+          fwd_algo_[i] = perfResults[a].algo;
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        LOG(FATAL) << "Can't find forward algorithm with memory limit "
+                   << limit_per_group << " bytes per group";
+      }
+    }
+    // Get backward data algorithm (if not set by user)
+    if (user_algos_override_[1] < 0) {
+      int count = 0;
+      CUDNN_CHECK(cudnnGetConvolutionBackwardDataAlgorithmMaxCount(Caffe::cudnn_handle(0), &count));
+      std::vector<cudnnConvolutionBwdDataAlgoPerf_t> perfResults;
+      CUDNN_CHECK(cudnnFindConvolutionBackwardDataAlgorithm(Caffe::cudnn_handle(0),
+          bwd_filter_desc_, bwd_top_descs_[i], bwd_conv_data_descs_[i], bwd_bottom_descs_[i],
+          count, &returnedAlgoCount, &perfResults.front()));
+      if (returnedAlgoCount < 1) {
+        LOG(FATAL) << returnedAlgoCount << " algorithms returned";
+      }
+      bool found = false;
+      for (int a = 0; a < returnedAlgoCount; ++a) {
+        if (perfResults[a].memory <= limit_per_group) {
+          bwd_data_algo_[i] = perfResults[a].algo;
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        LOG(FATAL) << "Can't find backward data algorithm with memory limit "
+                   << limit_per_group << " bytes per group";
+      }
     }
     // Get backward filter algorithm (if not set by user)
     if (user_algos_override_[2] < 0) {
-      CUDNN_CHECK(cudnnGetConvolutionBackwardFilterAlgorithm(Caffe::cudnn_handle(0),
+      int count = 0;
+      CUDNN_CHECK(cudnnGetConvolutionBackwardFilterAlgorithmMaxCount(Caffe::cudnn_handle(0), &count));
+      std::vector<cudnnConvolutionBwdFilterAlgoPerf_t> perfResults;
+      CUDNN_CHECK(cudnnFindConvolutionBackwardFilterAlgorithm(Caffe::cudnn_handle(0),
           bwd_bottom_descs_[i], bwd_top_descs_[i], bwd_conv_filter_descs_[i], bwd_filter_desc_,
-          CUDNN_CONVOLUTION_BWD_FILTER_SPECIFY_WORKSPACE_LIMIT,
-          align_down<8>(workspace_bytes / ws_groups()), &bwd_filter_algo_[i]));
-      CUDA_CHECK(cudaStreamSynchronize(Caffe::thread_stream(0)));
+          count, &returnedAlgoCount, &perfResults.front()));
+      if (returnedAlgoCount < 1) {
+        LOG(FATAL) << returnedAlgoCount << " algorithms returned";
+      }
+      bool found = false;
+      for (int a = 0; a < returnedAlgoCount; ++a) {
+        if (perfResults[a].memory <= limit_per_group) {
+          bwd_filter_algo_[i] = perfResults[a].algo;
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        LOG(FATAL) << "Can't find backward filter algorithm with memory limit "
+                   << limit_per_group << " bytes per group";
+      }
     }
     LOG(INFO) << Phase_Name(this->phase_)
         << " Conv Algos by Get* (F,BD,BF) for layer '" << this->name()

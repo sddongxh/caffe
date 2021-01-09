@@ -3,8 +3,11 @@
 #include <map>
 #include <vector>
 
-#include "thrust/functional.h"
-#include "thrust/sort.h"
+#if !defined(THRUST_IGNORE_CUB_VERSION_CHECK)
+#define THRUST_IGNORE_CUB_VERSION_CHECK 1
+#endif
+#include <thrust/functional.h>
+#include <thrust/sort.h>
 
 #include "caffe/common.hpp"
 #include "caffe/util/bbox_util.hpp"

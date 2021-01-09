@@ -7,7 +7,7 @@
   ((__CUDACC_VER_MAJOR__ * 10000) + (__CUDACC_VER_MINOR__ * 100))
 #endif
 
-#if BOOST_VERSION >= 106100
+#if (BOOST_VERSION >= 106100) && !defined(BOOST_CUDA_VERSION)
 // error: class "boost::common_type<long, long>" has no member "type"
 #define BOOST_NO_CXX11_VARIADIC_TEMPLATES
 #if defined(__CUDACC_VER_MAJOR__) && defined(__CUDACC_VER_MINOR__) && defined(__CUDACC_VER_BUILD__)

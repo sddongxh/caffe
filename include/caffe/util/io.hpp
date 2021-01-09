@@ -323,11 +323,14 @@ void FloatCVMatToBuf(const cv::Mat& cv_img, size_t buf_len, Dtype* buf, bool rep
       LOG(FATAL) << "Image depth is not supported";
     }
   } else {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
     if (cv_img.depth() == CV_32F && tp<Dtype>() == FLOAT) {
       std::memcpy(buf, cv_img.ptr<float>(0), img_size * sizeof(float));  // NOLINT(caffe/alt_fn)
     } else if (cv_img.depth() == CV_64F && tp<Dtype>() == DOUBLE) {
       std::memcpy(buf, cv_img.ptr<double>(0), img_size * sizeof(double));  // NOLINT(caffe/alt_fn)
     } else {
+#pragma GCC diagnostic pop
       if (cv_img.depth() == CV_8U) {
         for (size_t i = 0UL; i < img_size; ++i) {
           buf[i] = static_cast<Dtype>(cv_img.ptr<unsigned char>(0)[i]);

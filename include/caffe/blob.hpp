@@ -55,7 +55,13 @@ class Blob {
       : Blob(dtype, dtype) {}
 
  public:
-  virtual ~Blob() {}
+  virtual ~Blob() = default;
+
+  enum class RESHAPE_MODE: int {
+    RESHAPE_DIFF = -1,
+    RESHAPE_BOTH = 0,
+    RESHAPE_DATA = 1
+  };
 
   /// @brief Deprecated; use <code>Reshape(const vector<int>& shape)</code>.
   void Reshape(const int num, const int channels, const int height, const int width);
@@ -75,8 +81,8 @@ class Blob {
    * an error; either Net::Forward or Net::Reshape need to be called to
    * propagate the new input shape to higher layers.
    */
-  void Reshape(const vector<int>& shape);
-  void Reshape(const BlobShape& shape);
+  void Reshape(const vector<int>& shape, RESHAPE_MODE mode = RESHAPE_MODE::RESHAPE_BOTH);
+  void Reshape(const BlobShape& shape, RESHAPE_MODE mode = RESHAPE_MODE::RESHAPE_BOTH);
 
   void ReshapeLike(const Blob* other) {
     Reshape(other->shape());
@@ -111,9 +117,10 @@ class Blob {
 
   /// @brief Creates an instance of a Blob with given type Dtype and given shape.
   template<typename D, typename DI = D>
-  static shared_ptr<Blob> create(const vector<int>& shape) {
+  static shared_ptr<Blob> create(const vector<int>& shape,
+      RESHAPE_MODE mode = RESHAPE_MODE::RESHAPE_BOTH) {
     shared_ptr<Blob> ptr = create<D, DI>();
-    ptr->Reshape(shape);
+    ptr->Reshape(shape, mode);
     return ptr;
   }
 
@@ -303,6 +310,7 @@ class Blob {
   template<typename Dtype>
   void set_cpu_data(Dtype* data) {
     CHECK_NOTNULL(data);
+    ensure_data_count();
     convert_data(tp<Dtype>());
     CHECK(is_type<Dtype>(data_type()));
     data_tensor_->mutable_synced_mem()->set_cpu_data(data);
@@ -311,6 +319,7 @@ class Blob {
   template<typename Dtype>
   void set_cpu_diff(Dtype* diff) {
     CHECK_NOTNULL(diff);
+    ensure_diff_count();
     convert_diff(tp<Dtype>());
     CHECK(is_type<Dtype>(diff_type()));
     diff_tensor_->mutable_synced_mem()->set_cpu_data(diff);
@@ -318,18 +327,21 @@ class Blob {
 
   template<typename Dtype>
   const Dtype* cpu_data() const {
+    ensure_data_count();
     convert_data(tp<Dtype>());
     return static_cast<const Dtype*>(data_tensor_->synced_mem()->cpu_data());
   }
 
   template<typename Dtype>
   const Dtype* cpu_diff() const {
+    ensure_diff_count();
     convert_diff(tp<Dtype>());
     return static_cast<const Dtype*>(diff_tensor_->synced_mem()->cpu_data());
   }
 
   template<typename Dtype>
   Dtype* mutable_cpu_data_c(bool copy_from_gpu) {
+    ensure_data_count();
     convert_data(tp<Dtype>());
     return static_cast<Dtype*>(data_tensor_->mutable_synced_mem()->mutable_cpu_data(copy_from_gpu));
   }
@@ -341,6 +353,7 @@ class Blob {
 
   template<typename Dtype>
   Dtype* mutable_cpu_diff_c(bool copy_from_gpu) {
+    ensure_diff_count();
     convert_diff(tp<Dtype>());
     return static_cast<Dtype*>(diff_tensor_->mutable_synced_mem()->mutable_cpu_data(copy_from_gpu));
   }
@@ -390,36 +403,43 @@ class Blob {
 
   /// @brief Compute the sum of absolute values (L1 norm) of the diff.
   float asum_diff(int group = 0) const {
+    ensure_diff_count();
     return diff_tensor_->asum(group);
   }
 
   /// @brief Compute the sum of squares (L2 norm squared) of the data.
   float sumsq_data(int group = 0) const {
+    ensure_data_count();
     return data_tensor_->sumsq(group);
   }
 
   /// @brief Compute the sum of squares (L2 norm squared) of the diff.
   float sumsq_diff(int group = 0) const {
+    ensure_diff_count();
     return diff_tensor_->sumsq(group);
   }
 
   /// @brief Scale the blob data by a constant factor.
   void scale_data(float scale, void* handle = nullptr) {
+    ensure_data_count();
     data_tensor_->scale(scale, handle);
   }
 
   /// @brief Scale the blob diff by a constant factor.
   void scale_diff(float scale, void* handle = nullptr) {
+    ensure_diff_count();
     diff_tensor_->scale(scale, handle);
   }
 
   /// @brief Set all the blob's data elements to a value.
   void set_data(float value) {
+    ensure_data_count();
     data_tensor_->set(value);
   }
 
   /// @brief Set all the blob's diff elements to a value.
   void set_diff(float value) {
+    ensure_diff_count();
     diff_tensor_->set(value);
   }
 
@@ -480,28 +500,33 @@ class Blob {
 
   void set_gpu_data(void* data) {
     CHECK_NOTNULL(data);
+    ensure_data_count();
     data_tensor_->mutable_synced_mem()->set_gpu_data(data);
   }
 
   void set_gpu_diff(void* diff) {
     CHECK_NOTNULL(diff);
+    ensure_diff_count();
     diff_tensor_->mutable_synced_mem()->set_gpu_data(diff);
   }
 
   template<typename Dtype>
   const Dtype* gpu_data() const {
+    ensure_data_count();
     convert_data(tp<Dtype>());
     return static_cast<const Dtype*>(data_tensor_->synced_mem()->gpu_data());
   }
 
   template<typename Dtype>
   const Dtype* gpu_diff() const {
+    ensure_diff_count();
     convert_diff(tp<Dtype>());
     return static_cast<const Dtype*>(diff_tensor_->synced_mem()->gpu_data());
   }
 
   template<typename Dtype>
   Dtype* mutable_gpu_data_c(bool copy_from_cpu) {
+    ensure_data_count();
     convert_data(tp<Dtype>());
     return static_cast<Dtype*>(data_tensor_->mutable_synced_mem()->mutable_gpu_data(copy_from_cpu));
   }
@@ -513,6 +538,7 @@ class Blob {
 
   template<typename Dtype>
   Dtype* mutable_gpu_diff_c(bool copy_from_cpu) {
+    ensure_diff_count();
     convert_diff(tp<Dtype>());
     return static_cast<Dtype*>(diff_tensor_->mutable_synced_mem()->mutable_gpu_data(copy_from_cpu));
   }
@@ -571,6 +597,18 @@ class Blob {
 
   void convert_diff(Type new_diff_type) const {
     diff_tensor_->convert(new_diff_type);
+  }
+
+  void ensure_data_count() const {
+    if (data_tensor_->is_empty() && !diff_tensor_->is_empty()) {
+      data_tensor_->Reshape(diff_tensor_->count_);
+    }
+  }
+
+  void ensure_diff_count() const {
+    if (diff_tensor_->is_empty() && !data_tensor_->is_empty()) {
+      diff_tensor_->Reshape(data_tensor_->count_);
+    }
   }
 
   static float at(int offset, Type dtype, const void* data);

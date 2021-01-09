@@ -56,11 +56,17 @@ void BaseDataLayer<Ftype, Btype>::LayerSetUp(const vector<Blob*>& bottom,
   DataLayerSetUp(bottom, top);
 }
 
+std::string bpdl_name(size_t rank) {
+  std::ostringstream os;
+  os << "BasePrefetchingDataLayer of local solver rank " << rank;
+  return os.str();
+}
+
 template<typename Ftype, typename Btype>
 BasePrefetchingDataLayer<Ftype, Btype>::BasePrefetchingDataLayer(const LayerParameter& param,
     size_t solver_rank)
     : BaseDataLayer<Ftype, Btype>(param, threads(param)),
-      InternalThread(Caffe::device(), solver_rank, threads(param), false),
+      InternalThread(Caffe::device(), solver_rank, threads(param), false, bpdl_name(solver_rank)),
       auto_mode_(Caffe::mode() == Caffe::GPU && this->phase_ == TRAIN && auto_mode(param)),
       parsers_num_(parser_threads(param)),
       transf_num_(threads(param)),

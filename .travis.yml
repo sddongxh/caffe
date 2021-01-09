@@ -1,4 +1,4 @@
-dist: trusty
+dist: bionic
 sudo: required
 
 language: cpp
@@ -14,14 +14,14 @@ env:
     #   WITH_PYTHON3: false
     #   WITH_CUDA: const true since v0.17
     #   WITH_CUDNN: false
-    - BUILD_NAME="default-make"
-#   - BUILD_NAME="python3-make" WITH_PYTHON3=true
-    - BUILD_NAME="cudnn-make" WITH_CUDNN=true
+#    - BUILD_NAME="default-make"
+    - BUILD_NAME="python3-make" WITH_PYTHON3=true
+    - BUILD_NAME="python3-cudnn-make" WITH_PYTHON3=true WITH_CUDNN=true
 
-    - BUILD_NAME="default-cmake" WITH_CMAKE=true
+#    - BUILD_NAME="default-cmake" WITH_CMAKE=true
     - BUILD_NAME="python3-cmake" WITH_CMAKE=true WITH_PYTHON3=true
-    - BUILD_NAME="cudnn-cmake" WITH_CMAKE=true WITH_CUDNN=true
-    - BUILD_NAME="cudnn-python3-cmake" WITH_CMAKE=true WITH_CUDNN=true WITH_PYTHON3=true
+#    - BUILD_NAME="cudnn-cmake" WITH_CMAKE=true WITH_CUDNN=true
+    - BUILD_NAME="python3-cudnn-cmake" WITH_CMAKE=true WITH_CUDNN=true WITH_PYTHON3=true
 
 cache:
   apt: true

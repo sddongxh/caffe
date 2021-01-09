@@ -14,6 +14,13 @@ std::mutex DataReader<DatumType>::db_mutex_;
 template<typename DatumType>
 std::mutex DataReader<DatumType>::DataCache::cache_mutex_{};
 
+std::string dr_name(size_t rank, size_t parser_threads_num, size_t transf_threads_num) {
+  std::ostringstream os;
+  os << "DataReader of local solver rank " << rank
+      << ", parser threads " << parser_threads_num << ", transf threads " << transf_threads_num;
+  return os.str();
+}
+
 template<typename DatumType>
 DataReader<DatumType>::DataReader(const LayerParameter& param,
     size_t local_solver_count,
@@ -27,7 +34,8 @@ DataReader<DatumType>::DataReader(const LayerParameter& param,
     bool shuffle,
     bool epoch_count_required)
     : InternalThread(Caffe::device(),
-                     local_solver_rank, sample_only ? 1U : parser_threads_num, false),
+                     local_solver_rank, sample_only ? 1U : parser_threads_num, false,
+                     dr_name(local_solver_rank, parser_threads_num, transf_threads_num)),
       parser_threads_num_(threads_num()),
       transf_threads_num_(sample_only ? 1U : transf_threads_num),
       queues_num_(parser_threads_num_ * transf_threads_num_),

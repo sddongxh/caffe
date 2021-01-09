@@ -698,13 +698,14 @@ int main(int argc, char** argv) {
   get_gpus(&gpus);
   Caffe::SetDevice(gpus.size() > 0 ? gpus[0] : 0);
   Caffe::set_gpus(gpus);
+  Caffe::Properties& props = Caffe::props();
 
-  LOG(INFO) << "This is NVCaffe " << Caffe::caffe_version()
-            << " started at " << Caffe::start_time();
-  LOG(INFO) << "CuDNN version: " << Caffe::cudnn_version();
-  LOG(INFO) << "CuBLAS version: " << Caffe::cublas_version();
-  LOG(INFO) << "CUDA version: " << Caffe::cuda_version();
-  LOG(INFO) << "CUDA driver version: " << Caffe::cuda_driver_version();
+  LOG(INFO) << "This is NVCaffe " << props.caffe_version()
+            << " started at " << props.start_time();
+  LOG(INFO) << "CuDNN version: " << props.cudnn_version();
+  LOG(INFO) << "CuBLAS version: " << props.cublas_version();
+  LOG(INFO) << "CUDA version: " << props.cuda_version();
+  LOG(INFO) << "CUDA driver version: " << props.cuda_driver_version();
   LOG(INFO) << "Arguments: " << os.str();
 
   if (argc == 2) {

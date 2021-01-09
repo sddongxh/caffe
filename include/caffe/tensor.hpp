@@ -20,7 +20,7 @@ class Tensor {
 
  public:
   explicit Tensor(Type type);
-  ~Tensor() {}
+  ~Tensor() = default;
 
   std::string to_string(int indent) const;
 

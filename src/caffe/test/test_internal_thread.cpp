@@ -12,7 +12,7 @@ namespace caffe {
 class InternalThreadTest : public ::testing::Test {};
 
 TEST_F(InternalThreadTest, TestStartAndExit) {
-  InternalThread thread(Caffe::device(), 0U, 1, false);
+  InternalThread thread(Caffe::device(), 0U, 1, false, "TestStartAndExit");
   EXPECT_FALSE(thread.is_started());
   thread.StartInternalThread();
   EXPECT_TRUE(thread.is_started());
@@ -26,7 +26,7 @@ class TestThreadA : public InternalThread {
   }
  public:
   TestThreadA(int device = Caffe::device())
-    : InternalThread(device, 0U, 1, false) {}
+    : InternalThread(device, 0U, 1, false, "TestThreadA") {}
 };
 
 class TestThreadB : public InternalThread {
@@ -35,7 +35,7 @@ class TestThreadB : public InternalThread {
   }
  public:
   TestThreadB(int device = Caffe::device())
-    : InternalThread(device, 0U, 1, false) {}
+    : InternalThread(device, 0U, 1, false, "TestThreadB") {}
 };
 
 TEST_F(InternalThreadTest, TestRandomSeed) {

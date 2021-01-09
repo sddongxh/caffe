@@ -10,7 +10,6 @@ import time
 from glob import glob
 from google.protobuf import text_format
 from PIL import Image
-import scipy.misc
 
 # os.environ['GLOG_minloglevel'] = '2' # Suppress most caffe output
 import caffe
@@ -80,9 +79,8 @@ def load_image(path, height, width, mode='RGB'):
     """
     image = Image.open(path)
     image = image.convert(mode)
-    image = np.array(image)
     # squash
-    image = scipy.misc.imresize(image, (height, width), 'bilinear')
+    image = np.array(image.resize((height, width), Image.BILINEAR))
     return image
 
 def forward_pass(images, net, transformer, batch_size=None):

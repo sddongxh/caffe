@@ -17,7 +17,7 @@ namespace caffe {
 
 // Must be set before brewing
 Caffe::Brew Caffe::mode_ = Caffe::GPU;
-int Caffe::solver_count_ = 1;
+size_t Caffe::solver_count_ = 1;
 std::vector<int> Caffe::gpus_;
 int Caffe::root_device_ = -1;
 int Caffe::thread_count_ = 0;
@@ -109,13 +109,14 @@ void Caffe::set_restored_iter(int val) {
 }
 
 void GlobalInit(int* pargc, char*** pargv) {
-  P2PManager::Init(pargc, pargv);
   // Google flags.
   ::gflags::ParseCommandLineFlags(pargc, pargv, true);
   // Google logging.
   ::google::InitGoogleLogging(*(pargv)[0]);
   // Provide a backtrace on segfault.
   ::google::InstallFailureSignalHandler();
+
+  P2PManager::Init(pargc, pargv);
 }
 
 int Caffe::device_count() {
@@ -466,7 +467,7 @@ Caffe::Properties::Properties() :
   for (int gpu = 0; gpu < compute_capabilities_.size(); ++gpu) {
     CUDA_CHECK(cudaGetDeviceProperties(&device_prop, gpus[gpu]));
     compute_capabilities_[gpu] = device_prop.major * 100 + device_prop.minor;
-    DLOG(INFO) << "GPU " << gpus[gpu] << " '" << device_prop.name
+    LOG(INFO) << "GPU " << gpus[gpu] << " '" << device_prop.name
                << "' has compute capability " << device_prop.major << "." << device_prop.minor;
   }
 #ifdef USE_CUDNN
@@ -474,9 +475,10 @@ Caffe::Properties::Properties() :
 #else
   cudnn_version_ = "USE_CUDNN is not defined";
 #endif
-  shared_ptr<CuBLASHandle> phandle = Caffe::short_term_cublas_phandle();
+  cublasHandle_t handle;
+  CUBLAS_CHECK(cublasCreate(&handle));
   int cublas_version = 0;
-  CUBLAS_CHECK(cublasGetVersion(phandle->get(), &cublas_version));
+  CUBLAS_CHECK(cublasGetVersion(handle, &cublas_version));
   cublas_version_ = std::to_string(cublas_version);
 
   int cuda_version = 0;
@@ -492,7 +494,7 @@ std::string Caffe::time_from_init() {
   std::ostringstream os;
   os.unsetf(std::ios_base::floatfield);
   os.precision(4);
-  double span = std::difftime(std::time(NULL), init_time());
+  double span = std::difftime(std::time(NULL), props().init_time());
   const double mn = 60.;
   const double hr = 3600.;
   if (span < mn) {

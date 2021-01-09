@@ -62,10 +62,6 @@ class P2PManager {
   }
 #endif
 
-  void bar_wait(int b) {
-    bar_[b]->wait();
-  }
-
   static void Init(int *argc, char ***argv);
 
   static int global_rank() {
@@ -80,6 +76,9 @@ class P2PManager {
     return host_name_;
   }
 
+  static unique_ptr<boost::barrier> solve_bar_;
+  static unique_ptr<boost::barrier> solved_bar_;
+
  protected:
   const size_t nranks_;
   vector<unique_ptr<P2PSync>> syncs_;
@@ -88,8 +87,6 @@ class P2PManager {
 #ifdef USE_NCCL
   ncclUniqueId nccl_id_;
 #endif
-  static unique_ptr<boost::barrier> bar_[3];
-
   static int global_rank_;
   static int global_count_;
   static char host_name_[_POSIX_HOST_NAME_MAX + 1];
@@ -101,14 +98,19 @@ class P2PSync : public Solver::Callback, public InternalThread {
  public:
   P2PSync(P2PManager* mgr, shared_ptr<Solver> root_solver,
       int rank, int nranks, const SolverParameter& param);
-  virtual ~P2PSync();
+  ~P2PSync();
 
   // Divide the batch size by the number of solvers
   static unsigned int divide_batch_size(NetParameter* net);
 
   void allreduce(int param_id) override;
   void allreduce_bucket(size_t count, void* bucket, Type type) override;
-  void soft_barrier(int b) override;
+  void solve_barrier() override {
+    P2PManager::solve_bar_->wait();
+  }
+  void solved_barrier() override {
+    P2PManager::solved_bar_->wait();
+  }
   void cancel_all() override;
   void saveTestResults(float loss, const vector<float>& scores) override;
   void aggregateTestResults(float* loss, vector<float>* scores) override;

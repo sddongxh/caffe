@@ -107,7 +107,8 @@ class Solver {
    public:
     virtual void allreduce(int param_id) = 0;
     virtual void allreduce_bucket(size_t count, void* bucket, Type type) = 0;
-    virtual void soft_barrier(int b) = 0;
+    virtual void solve_barrier() = 0;
+    virtual void solved_barrier() = 0;
     virtual void cancel_all() = 0;
     virtual void saveTestResults(float loss, const vector<float>& scores) = 0;
     virtual void aggregateTestResults(float* loss, vector<float>* scores) = 0;
@@ -197,7 +198,7 @@ class Solver {
 
   void callback_soft_barrier() {
     if (callback_ != nullptr) {
-      callback_->soft_barrier(0);
+      callback_->solve_barrier();
     }
   }
 
