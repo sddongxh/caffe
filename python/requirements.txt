@@ -1,5 +1,4 @@
 Cython>=0.19.2
-gfortran
 numpy>=1.18.1
 scipy>=0.13.3,<=0.17.0
 scikit-image>=0.9.3
