@@ -1,3 +1,7 @@
+# NVIDIA has discontinued support and maintenance for this repository. Everything is provided as-is with no further updates being accepted. Thanks for all the contributions and engagement!
+
+
+
 # Caffe
 
 Caffe is a deep learning framework made with expression, speed, and modularity in mind.
@@ -44,8 +48,3 @@ Please cite Caffe in your publications if it helps your research:
       Year = {2014}
     }
    
-## Contributions
-
-Please read, sign and attach enclosed agreement **NVIDIA_CLA_v1.0.1.docx**
-to your PR.
-
