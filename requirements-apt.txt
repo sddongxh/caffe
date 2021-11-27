@@ -1,0 +1,18 @@
+apt install libturbojpeg0-dev
+apt install libatlas-base-dev 
+apt install liblmdb-dev
+apt-get install libgflags-dev
+apt-get install libgoogle-glog-dev
+apt install protobuf-c-compiler
+apt-get install libboost-all-dev
+apt-get install libleveldb-dev 
+apt-get install libblas-dev
+apt-get install libhdf5-serial-dev
+
+
+# You need to generate caffe.pb.h manually using protoc as follows.
+
+# # In the directory you installed Caffe to
+# protoc src/caffe/proto/caffe.proto --cpp_out=.
+# mkdir include/caffe/proto
+# mv src/caffe/proto/caffe.pb.h include/caffe/proto

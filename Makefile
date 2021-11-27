@@ -463,7 +463,7 @@ ifeq ($(USE_PKG_CONFIG), 1)
 		PKG_CONFIG := $(shell pkg-config opencv --libs)
 	endif
 else
-	PKG_CONFIG :=
+	PKG_CONFIG := -lopencv_core -lopencv_imgcodecs -lopencv_video -lopencv_videoio -lopencv_imgproc
 endif
 LDFLAGS += $(foreach librarydir,$(LIBRARY_DIRS),-L$(librarydir)) $(PKG_CONFIG) \
 		$(foreach library,$(LIBRARIES),-l$(library))
